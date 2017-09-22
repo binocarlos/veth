@@ -1,0 +1,11 @@
+{
+  "name": "veth",
+  "version": "1.0.0",
+  "description": "Ethereum development setup",
+  "scripts": {},
+  "dependencies": {
+    "truffle": "^3.4.9"
+  },
+  "devDependencies": {},
+  "license": "MIT"
+}
