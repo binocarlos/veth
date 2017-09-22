@@ -8,17 +8,29 @@ Ethereum development setup
 $ docker build -t binocarlos/veth .
 ```
 
-## install geth on OSX
+Then clone this folder and install the wrapper:
 
 ```bash
-brew update
-brew upgrade
-brew tap ethereum/ethereum
-brew install ethereum
+$ git clone https://github.com/binocarlos/veth.git
+$ cd veth
+$ sudo ln -s ./veth /usr/local/bin/veth
+```
+
+TODO: better installation
+
+## useful things
+
+#### install geth on OSX
+
+```bash
+$ brew update
+$ brew upgrade
+$ brew tap ethereum/ethereum
+$ brew install ethereum
 ```
 
 Then to start the chain download:
 
 ```bash
-geth --datadir $HOME/.veth --fast --cache 1024
+$ geth --datadir $HOME/.veth --fast --cache 1024
 ```
