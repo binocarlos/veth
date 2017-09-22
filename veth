@@ -5,7 +5,6 @@ set -e
 export DEBIAN_FRONTEND=noninteractive
 
 export VETH_IMAGE=${VETH_IMAGE:="binocarlos/veth"}
-export VETH_HOME=${VETH_HOME:="$HOME/.veth"}
 
 function run() {
   docker run -ti --rm \
