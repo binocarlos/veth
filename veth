@@ -5,12 +5,44 @@ set -e
 export DEBIAN_FRONTEND=noninteractive
 
 export VETH_IMAGE=${VETH_IMAGE:="binocarlos/veth"}
+export GETH_IMAGE=${GETH_IMAGE:="ethereum/client-go"}
+export IPFS_IMAGE=${IPFS_IMAGE:="ipfs/go-ipfs"}
+export GETH_DATA=${GETH_DATA:="$PWD/.data"}
+export GETH_PASSWORD=${GETH_PASSWORD:="apples"}
 
-function run() {
+export GETH_HOME="/root/.ethereum"
+
+function reset() {
+  rm -rf "$GETH_DATA"
+}
+
+function init() {
+  mkdir -p "$GETH_DATA"
+  echo "$GETH_PASSWORD" > "$GETH_DATA/password.txt"
   docker run -ti --rm \
-    --name veth \
+    -v $GETH_DATA:/data \
+    $VETH_IMAGE cp /genesisblock.json /data/genesisblock.json
+  geth --password "$GETH_HOME/password.txt" account new
+  geth init "$GETH_HOME/genesisblock.json"
+}
+
+function truffle() {
+  echo docker run -ti --rm \
     -v $PWD:/app \
     $VETH_IMAGE "$@"
 }
 
-eval run "$@"
+function geth() {
+  docker run -ti --rm \
+    -v "$GETH_DATA:$GETH_HOME" \
+    $GETH_IMAGE "$@"
+}
+
+function ipfs() {
+  echo docker run -ti --rm \
+    $IPFS_IMAGE "$@"
+}
+
+cmd="$1"
+shift
+eval "$cmd $@"

@@ -1,0 +1,11 @@
+{
+  "name": "veth-tools",
+  "version": "1.0.0",
+  "description": "Ethereum and ipfs development setup tools",
+  "scripts": {},
+  "dependencies": {
+    "commander": "^2.12.2"
+  },
+  "devDependencies": {},
+  "license": "MIT"
+}

@@ -1,6 +1,6 @@
 # veth
 
-Ethereum development setup
+Ethereum / IPFS development setup
 
 ## install
 
