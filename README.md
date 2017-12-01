@@ -34,23 +34,31 @@ $ veth truffle test
 
 ## geth
 
-In the root of your repo - we can run a `geth` server that will keep it's state in `.data`:
+We can run multiple blockchains and join them for testing.
+
+The state for each node is kept in `~/.veth/<nodename>`
+
+To add a new node:
 
 ```bash
-$ veth init
+$ veth add node1
 ```
 
-This will write the password to `.data/password.txt` and the genesisblock to `.data/genesisblock.json`
-
-To run the geth server in mining mode:
+To start it:
 
 ```bash
-$ veth start
+$ veth start node1
 ```
 
-To get a console:
+To view its logs:
 
 ```bash
-$ veth console
+$ veth logs node1
+```
+
+To attach:
+
+```bash
+$ veth attach node1
 ```
 
