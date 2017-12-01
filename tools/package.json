@@ -4,7 +4,7 @@
   "description": "Ethereum and ipfs development setup tools",
   "scripts": {},
   "dependencies": {
-    "commander": "^2.12.2"
+    "truffle": "^4.0.1"
   },
   "devDependencies": {},
   "license": "MIT"

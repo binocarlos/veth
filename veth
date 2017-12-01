@@ -7,35 +7,120 @@ export DEBIAN_FRONTEND=noninteractive
 export VETH_IMAGE=${VETH_IMAGE:="binocarlos/veth"}
 export GETH_IMAGE=${GETH_IMAGE:="ethereum/client-go"}
 export IPFS_IMAGE=${IPFS_IMAGE:="ipfs/go-ipfs"}
-export GETH_DATA=${GETH_DATA:="$PWD/.data"}
+
 export GETH_PASSWORD=${GETH_PASSWORD:="apples"}
 
-export GETH_HOME="/root/.ethereum"
+export GETH_DATA_HOST=${GETH_DATA_HOST:="$HOME/.veth"}
+export GETH_DATA_CONTAINER="/root/.ethereum"
+
+export GETH_NETWORK_ID=${GETH_NETWORK_ID:="23422"}
+export GETH_RPC_PORT=${GETH_RPC_PORT:="8545"}
 
 function reset() {
   rm -rf "$GETH_DATA"
 }
 
-function init() {
-  mkdir -p "$GETH_DATA"
-  echo "$GETH_PASSWORD" > "$GETH_DATA/password.txt"
-  docker run -ti --rm \
-    -v $GETH_DATA:/data \
-    $VETH_IMAGE cp /genesisblock.json /data/genesisblock.json
-  geth --password "$GETH_HOME/password.txt" account new
-  geth init "$GETH_HOME/genesisblock.json"
+function genesisblock() {
+cat <<EOT
+{
+    "config": {
+        "chainId": 100,
+        "homesteadBlock": 0,
+        "eip155Block": 0,
+        "eip158Block": 0
+    },
+    "nonce": "0x0000000000000042",
+    "mixhash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "difficulty": "400",
+    "timestamp": "0x00",
+    "coinbase": "0x0000000000000000000000000000000000000000",
+    "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "gasLimit": "0xffffffff",
+    "alloc": {}
 }
-
-function truffle() {
-  echo docker run -ti --rm \
-    -v $PWD:/app \
-    $VETH_IMAGE "$@"
+EOT
 }
 
 function geth() {
+  docker run $GETH_EXTRA_DOCKER -v "$GETH_DATA_HOST/$GETH_NODE:$GETH_DATA_CONTAINER" $GETH_IMAGE "$@"
+}
+
+function list() {
+  ls -la "$GETH_DATA_HOST"
+}
+
+function gethnode() {
+  if [ -z "$GETH_NODE" ]; then
+    GETH_NODE="$1"
+  fi
+  if [ -z "$GETH_NODE" ]; then
+    echo >&2 "GETH_NODE or <name> variable required"
+    exit 1
+  fi
+  echo $GETH_NODE
+}
+
+function add() {
+  GETH_NODE=$(gethnode "$1")
+  if [ -d "$GETH_DATA_HOST/$GETH_NODE" ]; then
+    echo >&2 "$GETH_NODE already exists"
+    exit 1
+  fi
+  mkdir -p "$GETH_DATA_HOST/$GETH_NODE"
+  echo "$GETH_PASSWORD" > "$GETH_DATA_HOST/$GETH_NODE/password.txt"
+  genesisblock > "$GETH_DATA_HOST/$GETH_NODE/genesisblock.json"
+  geth --password "$GETH_DATA_CONTAINER//password.txt" account new
+  geth init "$GETH_DATA_CONTAINER/genesisblock.json"
+}
+
+function remove() {
+  GETH_NODE=$(gethnode "$1")
+  if [ ! -d "$GETH_DATA_HOST/$GETH_NODE" ]; then
+    echo >&2 "$GETH_NODE does not exist"
+    exit 1
+  fi
+  rm -rf "$GETH_DATA_HOST/$GETH_NODE"
+}
+
+function start() {
+  GETH_NODE=$(gethnode "$1")
+  export GETH_EXTRA_DOCKER=" --name geth$GETH_NODE -d"
+  geth \
+    --networkid "$GETH_NETWORK_ID" \
+    --rpc \
+    --rpccorsdomain="*" \
+    --rpcport="$GETH_RPC_PORT" \
+    --minerthreads="1" \
+    --mine \
+    --unlock 0 \
+    --password "$GETH_DATA_CONTAINER/password.txt" $GETH_EXTRA_COMMANDS
+}
+
+function join() {
+  echo hello
+}
+
+function logs() {
+  GETH_NODE=$(gethnode "$1")
+  docker logs -t -f "geth$GETH_NODE"
+}
+
+function attach() {
+  GETH_NODE=$(gethnode "$1")
+  export GETH_EXTRA_DOCKER=" -ti --rm"
+  geth attach "ipc:$GETH_DATA_CONTAINER/geth.ipc"
+}
+
+function console() {
+  attach "$@"
+}
+
+function truffle() {
   docker run -ti --rm \
-    -v "$GETH_DATA:$GETH_HOME" \
-    $GETH_IMAGE "$@"
+    -v $PWD:/app/project \
+    --workdir /app/project \
+    --entrypoint truffle \
+    $VETH_IMAGE "$@"
 }
 
 function ipfs() {
