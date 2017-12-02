@@ -1,64 +1,140 @@
 # veth
 
-Ethereum / IPFS development setup
+Ethereum / IPFS development toolkit with:
+
+ * [truffle](http://truffleframework.com/)
+ * [geth](https://github.com/ethereum/go-ethereum)
+ * [ipfs](https://ipfs.io/)
+
+veth is a bash script that uses Docker to hide the complexity of running the various tools.
 
 ## install
+
+First - [install docker](https://docs.docker.com/engine/installation/), then download and install the script:
 
 ```bash
 $ docker run --rm binocarlos/veth install | sudo cat > /usr/local/bin/veth
 $ sudo chmod a+x /usr/local/bin/veth
 ```
 
-## truffle
+## truffle development
 
-In your repo create a folder for the truffle files (e.g. `truffle`):
-
-```bash
-$ mkdir truffle
-$ cd truffle
-```
-
-Then initialize:
+Change to the root of your project folder and you can work with truffle to compile your contracts:
 
 ```bash
+$ veth truffle --help
 $ veth truffle init
-```
-
-From now on - from within the `truffle` folder you can run truffle as normal:
-
-```bash
 $ veth truffle compile
 $ veth truffle migrate
 $ veth truffle test
 ```
 
-## geth
+## private blockchain
 
-We can run multiple blockchains and join them for testing.
+Run all commands from the root of your project - veth keeps state in the `.veth` folder which should be `.gitignored`
 
-The state for each node is kept in `~/.veth/<nodename>`
+Each geth node has a name that you pass to each of the commands to dictate which node to operate on.
 
-To add a new node:
+If you are working with a single node you can omit the name and it will default to `node1`.
 
-```bash
-$ veth add node1
-```
-
-To start it:
+#### initialize
 
 ```bash
-$ veth start node1
+$ veth initialize
 ```
 
-To view its logs:
+Multiple nodes with custom names:
 
 ```bash
-$ veth logs node1
+$ veth initialize chain1
+$ veth initialize chain2
 ```
 
-To attach:
+This will create two folders to hold blockchain state: `.veth/{chain1,chain2}`
+
+Each state folder contains:
+
+ * `account.txt` - the account id for the miner account
+ * `password.txt` - the password for the miner account
+ * various state for the geth node
+
+#### list
+
+List the current blockchain folders:
 
 ```bash
-$ veth attach node1
+$ veth list
 ```
 
+To remove a node, delete it's state folder:
+
+```bash
+$ rm -f .veth/node2
+```
+
+#### start
+
+To start a geth instance that automatically mines:
+
+```bash
+$ veth start
+```
+
+To attach to the node logs:
+
+```bash
+$ veth logs
+```
+
+To start a named chain:
+
+```bash
+$ veth start chain1
+$ veth logs chain1
+```
+
+To start a node and have it join an existing node:
+
+```bash
+$ veth start <startnode> [runningnode]
+```
+
+For example - to start chain1, then start chain2 and join it to chain1:
+
+```bash
+$ veth start chain1
+$ veth start chain2 chain1
+```
+
+#### attach
+
+To attach to the console for a node:
+
+```bash
+$ veth attach
+```
+
+#### exec
+
+To run JS commands directly - you **must** name the node:
+
+```bash
+$ veth exec node1 'admin.nodeInfo.id'
+```
+
+#### utilities
+
+Useful functions for managing a geth node:
+
+```bash
+$ # get the enode publickey@ipaddress:port
+$ veth enode chain1
+```
+
+## docs
+
+Useful docs for Solidity:
+
+ * [tips and tricks](https://solidity.readthedocs.io/en/develop/miscellaneous.html#tips-and-tricks)
+ * [cheatsheet](https://solidity.readthedocs.io/en/develop/miscellaneous.html#cheatsheet)
+ * [command line options](https://github.com/ethereum/go-ethereum/wiki/Command-Line-Options)

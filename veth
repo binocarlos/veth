@@ -10,15 +10,15 @@ export IPFS_IMAGE=${IPFS_IMAGE:="ipfs/go-ipfs"}
 
 export GETH_PASSWORD=${GETH_PASSWORD:="apples"}
 
-export GETH_DATA_HOST=${GETH_DATA_HOST:="$HOME/.veth"}
+export GETH_DATA_HOST=${GETH_DATA_HOST:="$PWD/.veth"}
 export GETH_DATA_CONTAINER="/root/.ethereum"
 
 export GETH_NETWORK_ID=${GETH_NETWORK_ID:="23422"}
 export GETH_RPC_PORT=${GETH_RPC_PORT:="8545"}
 
-function reset() {
-  rm -rf "$GETH_DATA"
-}
+#
+# HELPERS
+#
 
 function genesisblock() {
 cat <<EOT
@@ -41,26 +41,57 @@ cat <<EOT
 EOT
 }
 
-function geth() {
-  docker run $GETH_EXTRA_DOCKER -v "$GETH_DATA_HOST/$GETH_NODE:$GETH_DATA_CONTAINER" $GETH_IMAGE "$@"
-}
-
-function list() {
-  ls -la "$GETH_DATA_HOST"
-}
-
 function gethnode() {
   if [ -z "$GETH_NODE" ]; then
     GETH_NODE="$1"
   fi
   if [ -z "$GETH_NODE" ]; then
-    echo >&2 "GETH_NODE or <name> variable required"
-    exit 1
+    GETH_NODE="node1"
   fi
   echo $GETH_NODE
 }
 
-function add() {
+function containerip() {
+  docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$1"
+}
+
+function enode() {
+  local ip=$(containerip "geth$1")
+  local id=$(docker run --rm -v "$GETH_DATA_HOST/$1:$GETH_DATA_CONTAINER" $GETH_IMAGE --exec 'admin.nodeInfo.id' attach "ipc:$GETH_DATA_CONTAINER/geth.ipc" | sed 's/"//g')
+  echo "enode://$id@$ip:30303"
+}
+
+
+#
+# BINARIES
+#
+
+function geth() {
+  GETH_NODE=$(gethnode)
+  if [ -t 0 ]; then
+    GETH_EXTRA_DOCKER="$GETH_EXTRA_DOCKER -t"
+  fi
+  docker run --rm -i $GETH_EXTRA_DOCKER -v "$GETH_DATA_HOST/$GETH_NODE:$GETH_DATA_CONTAINER" $GETH_IMAGE "$@"
+}
+
+
+function truffle() {
+  docker run -ti --rm \
+    -v $PWD:/app/project \
+    --workdir /app/project \
+    --entrypoint truffle \
+    $VETH_IMAGE "$@"
+}
+
+#
+# API
+#
+
+function list() {
+  ls -la "$GETH_DATA_HOST"
+}
+
+function init() {
   GETH_NODE=$(gethnode "$1")
   if [ -d "$GETH_DATA_HOST/$GETH_NODE" ]; then
     echo >&2 "$GETH_NODE already exists"
@@ -73,18 +104,14 @@ function add() {
   geth init "$GETH_DATA_CONTAINER/genesisblock.json"
 }
 
-function remove() {
-  GETH_NODE=$(gethnode "$1")
-  if [ ! -d "$GETH_DATA_HOST/$GETH_NODE" ]; then
-    echo >&2 "$GETH_NODE does not exist"
-    exit 1
-  fi
-  rm -rf "$GETH_DATA_HOST/$GETH_NODE"
-}
-
 function start() {
   GETH_NODE=$(gethnode "$1")
-  export GETH_EXTRA_DOCKER=" --name geth$GETH_NODE -d"
+  if [ -n "$2" ]; then
+    local joinenode=$(enode "$2")
+    GETH_EXTRA_COMMANDS="$GETH_EXTRA_COMMANDS --bootnodes $joinenode"
+    sleep 1
+  fi
+  GETH_EXTRA_DOCKER="$GETH_EXTRA_DOCKER --name geth$GETH_NODE -d"
   geth \
     --networkid "$GETH_NETWORK_ID" \
     --rpc \
@@ -96,8 +123,9 @@ function start() {
     --password "$GETH_DATA_CONTAINER/password.txt" $GETH_EXTRA_COMMANDS
 }
 
-function join() {
-  echo hello
+function stop() {
+  GETH_NODE=$(gethnode "$1")
+  docker rm -f "geth$GETH_NODE"
 }
 
 function logs() {
@@ -107,25 +135,12 @@ function logs() {
 
 function attach() {
   GETH_NODE=$(gethnode "$1")
-  export GETH_EXTRA_DOCKER=" -ti --rm"
   geth attach "ipc:$GETH_DATA_CONTAINER/geth.ipc"
 }
 
-function console() {
-  attach "$@"
-}
-
-function truffle() {
-  docker run -ti --rm \
-    -v $PWD:/app/project \
-    --workdir /app/project \
-    --entrypoint truffle \
-    $VETH_IMAGE "$@"
-}
-
-function ipfs() {
-  echo docker run -ti --rm \
-    $IPFS_IMAGE "$@"
+function exec() {
+  GETH_NODE=$(gethnode "$1")
+  geth --exec "$2" attach "ipc:$GETH_DATA_CONTAINER/geth.ipc"
 }
 
 cmd="$1"
