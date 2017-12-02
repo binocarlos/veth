@@ -112,6 +112,7 @@ To attach to the console for a node:
 
 ```bash
 $ veth attach
+$ veth attach chain1
 ```
 
 #### exec
@@ -122,13 +123,18 @@ To run JS commands directly - you **must** name the node:
 $ veth exec node1 'admin.nodeInfo.id'
 ```
 
-#### utilities
+## multi-node run through
 
-Useful functions for managing a geth node:
+To get a 2 node geth cluster running:
 
 ```bash
-$ # get the enode publickey@ipaddress:port
-$ veth enode chain1
+$ veth init node1
+$ veth init node2
+$ veth start node1
+$ veth start node2 node1
+$ veth exec node1 'admin.peers'
+$ veth attach node1
+$ veth logs node1
 ```
 
 ## docs
