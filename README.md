@@ -1,10 +1,9 @@
 # veth
 
-Ethereum / IPFS development toolkit with:
+Ethereum development toolkit with:
 
  * [truffle](http://truffleframework.com/)
  * [geth](https://github.com/ethereum/go-ethereum)
- * [ipfs](https://ipfs.io/)
 
 veth is a bash script that uses Docker to hide the complexity of running the various tools.
 
@@ -19,7 +18,7 @@ $ sudo chmod a+x /usr/local/bin/veth
 
 ## truffle development
 
-Change to the root of your project folder and you can work with truffle to compile your contracts:
+Change to the base of your project folder and you can work with truffle to compile your contracts:
 
 ```bash
 $ veth truffle --help
@@ -40,7 +39,7 @@ If you are working with a single node you can omit the name and it will default 
 #### initialize
 
 ```bash
-$ veth initialize
+$ veth initialize # (same as veth initialize node1)
 ```
 
 Multiple nodes with custom names:
@@ -66,7 +65,7 @@ List the current blockchain folders:
 $ veth list
 ```
 
-To remove a node, delete it's state folder:
+To remove a node's state, delete it's state folder:
 
 ```bash
 $ rm -f .veth/node2
