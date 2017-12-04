@@ -6,7 +6,6 @@ export DEBIAN_FRONTEND=noninteractive
 
 export VETH_IMAGE=${VETH_IMAGE:="binocarlos/veth"}
 export GETH_IMAGE=${GETH_IMAGE:="ethereum/client-go"}
-export IPFS_IMAGE=${IPFS_IMAGE:="ipfs/go-ipfs"}
 
 export GETH_PASSWORD=${GETH_PASSWORD:="apples"}
 
@@ -72,15 +71,6 @@ function geth() {
     GETH_EXTRA_DOCKER="$GETH_EXTRA_DOCKER -t"
   fi
   docker run --rm -i $GETH_EXTRA_DOCKER -v "$GETH_DATA_HOST/$GETH_NODE:$GETH_DATA_CONTAINER" $GETH_IMAGE "$@"
-}
-
-
-function truffle() {
-  docker run -ti --rm \
-    -v $PWD:/app/project \
-    --workdir /app/project \
-    --entrypoint truffle \
-    $VETH_IMAGE "$@"
 }
 
 #
