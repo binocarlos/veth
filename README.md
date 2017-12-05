@@ -7,7 +7,9 @@ veth is a bash script that uses Docker to run multile instances of [geth](https:
 First - [install docker](https://docs.docker.com/engine/installation/), then download and install the script:
 
 ```bash
-$ docker run --rm binocarlos/veth | sudo cat > /usr/local/bin/veth
+$ cd ~
+$ docker run --rm binocarlos/veth > veth
+$ sudo mv veth /usr/local/bin/veth
 $ sudo chmod a+x /usr/local/bin/veth
 ```
 
@@ -79,7 +81,7 @@ $ veth attach chain1
 
 #### exec
 
-To run JS commands directly - you **must** name the node:
+To run JS commands directly:
 
 ```bash
 $ veth exec chain1 'admin.nodeInfo.id'
