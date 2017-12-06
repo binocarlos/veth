@@ -63,6 +63,28 @@ If you had a third node - you could point it to either chain1 or chain2:
 $ veth start chain3 chain2
 ```
 
+#### start remote
+
+If you want to run veth on node A then run veth on node B connected to node A:
+
+On node A:
+
+```bash
+$ export VETH_REMOTE=1
+$ veth start
+$ veth enode
+```
+
+This will print the enode ID for node A - slack it ready for node B.
+You also need to slack the IP address of node A.
+
+Then on node B:
+
+```bash
+$ export VETH_REMOTE=1
+$ veth connect 192.168.0.20 69905763c3afd831a58f3368093933a38038f56a453f63b3a11ecf9a66d5b3914682787f96ecc57d067d8bf227633488f225aac6211e8f838cffabc69ccd549e
+```
+
 #### logs
 
 To follows logs for a node:
