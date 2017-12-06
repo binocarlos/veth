@@ -129,9 +129,15 @@ function start() {
   runstart $1
 }
 
+function cluster() {
+  export VETH_REMOTE=1
+  start
+}
+
 function connect() {
   local ip="$1"
   local id="$2"
+  export VETH_REMOTE=1
   GETH_EXTRA_COMMANDS="$GETH_EXTRA_COMMANDS --bootnodes enode://$id@$ip:30303"
   runstart
 }
