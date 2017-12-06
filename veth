@@ -108,6 +108,9 @@ function runstart() {
   if [ -n "$VETH_REMOTE" ]; then
     GETH_EXTRA_DOCKER="$GETH_EXTRA_DOCKER -p 30303:30303"
   fi
+  if [ -n "$VETH_EXPOSE_RPC" ]; then
+    GETH_EXTRA_DOCKER="$GETH_EXTRA_DOCKER -p 8545:8545"
+  fi
   geth \
     --networkid "$GETH_NETWORK_ID" \
     --rpc \
