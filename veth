@@ -113,7 +113,11 @@ function runstart() {
   fi
   geth \
     --networkid "$GETH_NETWORK_ID" \
-    --rpc --rpcapi "eth,net,web3" --rpcport $GETH_RPC_PORT \
+    --rpc \
+    --rpcapi "eth,net,web3" \
+    --rpcport $GETH_RPC_PORT \
+    --rpcaddr "0.0.0.0" \
+    --rpccorsdomain "*" \
     --minerthreads="1" \
     --mine \
     --unlock 0 \
