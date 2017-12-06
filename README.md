@@ -132,3 +132,12 @@ $ veth exec chain1 'admin.peers'
 $ veth attach chain1
 $ veth logs chain1
 ```
+
+## notes
+
+The networkID = `23422` - you can override this with:
+
+```bash
+$ GETH_NETWORK_ID=10050
+```
+
