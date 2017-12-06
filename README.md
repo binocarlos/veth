@@ -70,6 +70,7 @@ If you want to run veth on node A then run veth on node B connected to node A:
 On node A:
 
 ```bash
+$ export VETH_EXPOSE_RPC=1
 $ veth init
 $ veth cluster
 $ veth enode
@@ -81,6 +82,7 @@ You also need to slack the IP address of node A.
 Then on node B:
 
 ```bash
+$ export VETH_EXPOSE_RPC=1
 $ veth init
 $ veth connect 192.168.0.20 69905763c3afd831a58f3368093933a38038f56a453f63b3a11ecf9a66d5b3914682787f96ecc57d067d8bf227633488f225aac6211e8f838cffabc69ccd549e
 ```
