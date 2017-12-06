@@ -103,6 +103,7 @@ function init() {
 }
 
 function runstart() {
+  GETH_NODE=$(gethnode "$1")
   GETH_EXTRA_DOCKER="$GETH_EXTRA_DOCKER --name geth$GETH_NODE -d"
   if [ -n "$VETH_REMOTE" ]; then
     GETH_EXTRA_DOCKER="$GETH_EXTRA_DOCKER -p 30303:30303"
@@ -125,7 +126,7 @@ function start() {
     GETH_EXTRA_COMMANDS="$GETH_EXTRA_COMMANDS --bootnodes $joinenode"
     sleep 1
   fi
-  runstart
+  runstart $1
 }
 
 function connect() {
