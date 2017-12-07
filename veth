@@ -106,6 +106,10 @@ function init() {
   geth init "$GETH_DATA_CONTAINER/genesisblock.json"
 }
 
+function clean() {
+  rm -rf $GETH_DATA_HOST
+}
+
 function runstart() {
   GETH_NODE=$(gethnode "$1")
   GETH_EXTRA_DOCKER="$GETH_EXTRA_DOCKER --name geth$GETH_NODE -d"
