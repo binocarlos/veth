@@ -8,7 +8,7 @@ First - [install docker](https://docs.docker.com/engine/installation/), then dow
 
 ```bash
 $ cd ~
-$ docker run --rm binocarlos/veth:v0.0.7 > veth
+$ docker run --rm binocarlos/veth:v0.0.8 > veth
 $ sudo mv veth /usr/local/bin/veth
 $ sudo chmod a+x /usr/local/bin/veth
 ```
