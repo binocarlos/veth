@@ -35,7 +35,9 @@ cat <<EOT
     "coinbase": "0x0000000000000000000000000000000000000000",
     "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
     "gasLimit": "0xffffffff",
-    "alloc": {}
+    "alloc": {
+        "__ACCOUNT__": { "balance": "20000000000000000000" }
+    }
 }
 EOT
 }
@@ -97,9 +99,15 @@ function init() {
   fi
   mkdir -p "$GETH_DATA_HOST/$GETH_NODE"
   echo "$GETH_PASSWORD" > "$GETH_DATA_HOST/$GETH_NODE/password.txt"
-  genesisblock > "$GETH_DATA_HOST/$GETH_NODE/genesisblock.json"
-  geth --password "$GETH_DATA_CONTAINER//password.txt" account new
+  local accountstr=$(geth --password "$GETH_DATA_CONTAINER//password.txt" account new)
+  echo $accountstr
+  local account=$(echo $accountstr | cut -d '{' -f 2 | cut -d '}' -f 1)
+  genesisblock | sed "s/__ACCOUNT__/$account/" > "$GETH_DATA_HOST/$GETH_NODE/genesisblock.json"
   geth init "$GETH_DATA_CONTAINER/genesisblock.json"
+}
+
+function clean() {
+  rm -rf $GETH_DATA_HOST
 }
 
 function runstart() {
